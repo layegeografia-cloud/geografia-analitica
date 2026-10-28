@@ -1,0 +1,706 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Geografia Analítica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --ground:#0A1628; --surface:#10213C; --ink:#E6ECF7; --muted:#9FB0CC; --line:#22375C;
+  --lagoa:#6EA8FF; --lagoa-soft:#16305A; --terra:#F0B067; --terra-soft:#3A2A17;
+  --contour:rgba(110,168,255,.22); --contour-hi:rgba(240,176,103,.6);
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Public Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--ground);color:var(--ink);font:17px/1.65 var(--body);padding-inline:16px;padding-block:0;margin:0}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.05}
+p{margin:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--lagoa);outline-offset:3px;border-radius:2px}
+.mono{font-family:var(--mono);font-size:.78rem;letter-spacing:.05em;color:var(--muted)}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--lagoa)}
+
+/* top bar */
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-block:16px;flex-wrap:wrap;position:sticky;top:0;z-index:50;background:rgba(10,22,40,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin-inline:-16px;padding-inline:16px}
+.brand{font-family:var(--display);font-weight:800;font-size:1.15rem;letter-spacing:-.02em;text-decoration:none}
+.brand .cur{color:var(--lagoa)}
+.top nav{display:flex;gap:20px;flex-wrap:wrap}
+.top nav a{text-decoration:none;font-size:.92rem;color:var(--muted)}
+.top nav a:hover{color:var(--lagoa)}
+
+/* hero */
+.hero{position:relative;padding-block:48px 56px;display:grid;gap:28px;overflow:hidden;border-bottom:1px solid var(--line)}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero > *:not(canvas){position:relative}
+.hero{text-align:center;padding-block:64px 52px}
+.claim{font-family:var(--display);font-weight:800;font-size:clamp(2rem,5.4vw,3.9rem);line-height:1.08;
+ letter-spacing:-.03em;max-width:21ch;margin:0 auto;text-wrap:balance}
+.claim em{font-style:normal;color:var(--lagoa)}
+.hero .sub{color:var(--muted);max-width:62ch;margin:22px auto 0;font-size:1.06rem}
+.hero .cta{justify-content:center;margin-top:26px}
+.down{display:inline-block;margin-top:34px;color:var(--lagoa);text-decoration:none;font-size:1.5rem;
+ animation:bob 1.8s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(6px)}}
+@media (prefers-reduced-motion:reduce){.down{animation:none}}
+.hero .readout{justify-content:center}
+.hero .word{font-family:var(--display);font-weight:800;font-size:clamp(1.25rem,3.2vw,1.75rem);
+ line-height:1;letter-spacing:-.02em;margin:0 0 20px;color:var(--ink)}
+.cur{animation:blink 1.1s steps(1) infinite;color:var(--lagoa)}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.cur{animation:none}}
+.hero .lead{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:end}
+.hero h1{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:700;letter-spacing:-.02em;max-width:18ch}
+.hero p.sub{color:var(--muted);max-width:46ch;font-size:1.05rem}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.btn{display:inline-block;text-decoration:none;font:600 .95rem var(--body);padding:12px 20px;border-radius:6px;border:1px solid var(--ink);cursor:pointer;background:transparent;color:var(--ink)}
+.btn.primary{background:var(--lagoa);border-color:var(--lagoa);color:var(--ground)}
+.btn:hover{transform:translateY(-1px)}
+.readout{display:flex;gap:18px;flex-wrap:wrap}
+.readout span{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.readout b{color:var(--ink);font-weight:500}
+
+.view{display:none}
+.view.on{display:block;animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view.on{animation:none}}
+.top nav a.active{color:var(--ink);position:relative}
+.top nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--lagoa)}
+section{padding-block:72px 16px}
+.sh{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:24px;margin-bottom:32px;align-items:baseline}
+.sh h2{font-size:clamp(1.9rem,4.5vw,3rem);font-weight:800;letter-spacing:-.025em}
+
+/* sobre */
+.about{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:24px}
+.about .text{display:grid;gap:16px;max-width:62ch;font-size:1.08rem}
+.principles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:24px;margin-top:36px}
+.principles div{border-top:2px solid var(--lagoa);padding-top:12px;display:grid;gap:6px}
+.principles h3{font-size:1.15rem}
+.principles p{color:var(--muted);font-size:.95rem}
+
+/* serviços */
+.svc{display:grid;gap:18px}
+.row{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:30px;
+ background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(20px,3.4vw,34px)}
+.row .k{font-family:var(--mono);font-size:.74rem;color:var(--lagoa);letter-spacing:.12em;
+ grid-column:1/-1;margin-bottom:-10px}
+.row h3{font-size:clamp(1.5rem,3.2vw,2.1rem);font-weight:800;letter-spacing:-.02em}
+.row .desc{color:var(--muted);margin-top:10px;font-size:1.02rem}
+.row ul{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:.94rem}
+.row li{padding-left:18px;position:relative}
+.row li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:8px;border:1.5px solid var(--terra);border-radius:50%}
+.who{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px}
+.who span{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:.9rem}
+
+/* processo */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;counter-reset:s}
+.step{padding:20px 20px 20px 0;border-top:1px solid var(--ink);position:relative;display:grid;gap:8px;align-content:start}
+.step + .step{padding-left:20px;border-left:1px solid var(--line)}
+.step .n{font-family:var(--display);font-weight:800;font-size:2.4rem;color:var(--lagoa);line-height:1}
+.step p{color:var(--muted);font-size:.95rem}
+
+/* contato */
+.contact{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:clamp(20px,4vw,44px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px}
+.contact h2{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;letter-spacing:-.025em}
+.mail{font-family:var(--mono);font-size:clamp(.95rem,2.4vw,1.15rem);word-break:break-all;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.mail a{color:var(--lagoa);text-decoration-thickness:1px;text-underline-offset:4px}
+.copy{font:500 .8rem var(--body);border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:6px;padding:5px 10px;cursor:pointer}
+form{display:grid;gap:14px}
+label{display:grid;gap:5px;font-size:.88rem;color:var(--muted)}
+input,select,textarea{font:inherit;font-size:.98rem;color:var(--ink);background:var(--ground);border:1px solid var(--line);border-radius:6px;padding:10px 12px;width:100%}
+textarea{min-height:110px;resize:vertical}
+.hint{font-size:.82rem;color:var(--muted)}
+
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,3vw,30px)}
+.demobar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 22px}
+.chip{font:600 .86rem var(--body);background:transparent;color:var(--muted);border:1px solid var(--line);
+ border-radius:999px;padding:8px 16px;cursor:pointer}
+.chip.on{background:var(--lagoa);border-color:var(--lagoa);color:var(--ground)}
+.bgrid{display:grid;gap:14px}
+.bitem{border:1px solid var(--line);border-radius:10px;padding:16px;background:rgba(10,22,40,.5);cursor:pointer}
+.bitem:hover,.bitem.sel{border-color:var(--lagoa)}
+.bitem .top2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.bitem h4{font-family:var(--display);font-size:1.18rem;font-weight:700;margin:0}
+.bitem .pct{font-family:var(--display);font-weight:800;font-size:1.3rem;letter-spacing:-.02em}
+.pct.dn{color:#FF9B9B}.pct.up{color:#7FE0C2}
+.dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:12px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--lagoa)}
+.dot.go{background:rgba(230,236,247,.16)}
+.bitem .nums{font-family:var(--mono);font-size:.76rem;color:var(--muted);margin-top:10px}
+.demonote{font-size:.86rem;color:var(--muted);border-top:1px solid var(--line);margin-top:20px;padding-top:14px}
+.badge{display:inline-block;font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;
+ border:1px solid var(--terra);color:var(--terra);border-radius:999px;padding:4px 12px;margin-bottom:14px}
+.ofc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:30px}
+.ofc .when{display:grid;gap:12px}
+.ofc .when div{border-top:1px solid var(--line);padding-top:10px}
+.ofc .when b{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:3px;font-weight:500}
+.mod{border-left:2px solid var(--lagoa);padding-left:14px;margin-top:16px}
+.mod h4{font-family:var(--display);font-size:1.05rem;margin:0 0 4px}
+.mod p{color:var(--muted);font-size:.93rem;margin:0}
+@media (max-width:760px){.ofc{grid-template-columns:1fr}}
+.works{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}
+.work{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:8px;align-content:start}
+.work .k{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;color:var(--terra)}
+.work h3{font-size:1.1rem;font-weight:700;line-height:1.25;letter-spacing:-.01em}
+.work p{color:var(--muted);font-size:.9rem}
+.work .src{font-family:var(--mono);font-size:.72rem;color:#7C8EA8;border-top:1px solid var(--line);padding-top:9px;margin-top:4px}
+.deliver{grid-column:1/-1;border-top:1px solid var(--line);margin-top:20px;padding-top:16px;
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:16px}
+.deliver div{display:grid;gap:4px}
+.deliver b{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;font-weight:500}
+.deliver span{font-size:.92rem}
+.dest{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px;
+ padding-block:34px;border-bottom:1px solid var(--line)}
+.dcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;
+ display:grid;gap:7px;align-content:start;text-decoration:none;color:inherit}
+.dcard:hover{border-color:var(--lagoa)}
+.dcard .k{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;color:var(--lagoa)}
+.dcard h3{font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
+.dcard p{color:var(--muted);font-size:.9rem}
+.dcard .go{font-family:var(--mono);font-size:.78rem;color:var(--ink);margin-top:2px}
+.dcard.hl{background:#13294C;border-color:#2B4C86}
+.rowcta{margin-top:14px}
+.rowcta a{font:600 .92rem var(--body);text-decoration:none;color:var(--ground);background:var(--lagoa);
+ border:1px solid var(--lagoa);border-radius:6px;padding:11px 20px;display:inline-block}
+.rowcta a:hover{filter:brightness(1.08)}
+.curso{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:clamp(20px,4vw,40px);
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:start}
+.curso .prog{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:9px;counter-reset:m}
+.curso .prog li{counter-increment:m;position:relative;padding-left:34px;font-size:.96rem}
+.curso .prog li::before{content:counter(m,decimal-leading-zero);position:absolute;left:0;top:1px;
+  font-family:var(--mono);font-size:.76rem;color:var(--lagoa)}
+.curso .facts{display:grid;gap:10px;margin-top:18px}
+.curso .facts div{display:flex;gap:10px;border-top:1px solid var(--line);padding-top:10px;font-size:.94rem}
+.curso .facts b{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;color:var(--muted);
+  text-transform:uppercase;width:92px;flex:none;padding-top:3px;font-weight:500}
+@media (max-width:760px){.curso{grid-template-columns:1fr}}
+.faq{display:grid;gap:0;border-top:1px solid var(--ink)}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;padding:20px 44px 20px 0;position:relative;
+  font:700 clamp(1.05rem,2.4vw,1.25rem)/1.35 var(--display);letter-spacing:-.01em}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  font:400 1.6rem var(--body);color:var(--lagoa);line-height:1}
+.faq details[open] summary::after{content:"\2212"}
+.faq summary:hover{color:var(--lagoa)}
+.faq .a{padding:0 44px 22px 0;color:var(--muted);max-width:68ch;display:grid;gap:10px}
+.faq .a ul{margin:0;padding-left:18px;display:grid;gap:4px}
+footer{padding-block:48px 40px;margin-top:72px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer .brand{font-size:1rem}
+
+@media (max-width:760px){
+  .hero .lead,.sh,.about,.contact{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr;gap:16px}
+  .steps{grid-template-columns:1fr 1fr}
+  .step:nth-child(3){padding-left:0;border-left:0}
+}
+@media (max-width:440px){
+  .steps{grid-template-columns:1fr}
+  .step + .step{padding-left:0;border-left:0}
+  .top nav{gap:14px}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#inicio">geografia analítica<span class="cur">_</span></a>
+    <nav aria-label="Menu"><a href="#inicio">Início</a><a href="#servicos">Serviços</a><a href="#curso">Curso MEI</a><a href="#ajuda">Ajuda</a><a href="#contato">Contato</a><a href="https://www.instagram.com/geografia.analitica/" target="_blank" rel="noopener">Instagram ↗</a></nav>
+  </header>
+
+    <main>
+  <div class="view" id="inicio">
+<div class="hero">
+    <canvas id="field" aria-hidden="true"></canvas>
+    <div class="readout" aria-hidden="true"><span>lat <b>−9.6658</b></span><span>lon <b>−35.7353</b></span><span>Maceió · AL</span><span id="ro-z">curvas: <b>—</b></span></div>
+    <p class="word">geografia analítica<span class="cur">_</span></p>
+    <h1 class="claim">Dados e tecnologia aplicados ao território, <em>para decidir com número e não com palpite</em></h1>
+    <p class="sub">Um projeto de Layê, profissional de geografia e dados em Maceió. Análise espacial, geomarketing e inteligência artificial — e também criação de sites e formação para quem está começando um negócio.</p>
+    <div class="cta"><a class="btn primary" href="#contato">Pedir orçamento</a><a class="btn" href="#curso">Conhecer o curso de MEI</a></div>
+    <a class="down" href="#servicos" aria-label="Ver serviços">▾</a>
+  </div>
+
+  <div class="dest">
+    <a class="dcard" href="#servicos"><span class="k">SERVIÇO</span><h3>Dados e IA no território</h3><p>Análise espacial, satélite e automação de mapas.</p><span class="go">Ver serviços →</span></a>
+    <a class="dcard" href="#servicos"><span class="k">SERVIÇO</span><h3>Geomarketing</h3><p>Onde abrir, quem atender, até onde entregar.</p><span class="go">Ver serviços →</span></a>
+    <a class="dcard" href="#servicos"><span class="k">SERVIÇO</span><h3>Criação de sites</h3><p>Endereço próprio na internet, com contato que funciona.</p><span class="go">Ver serviços →</span></a>
+    <a class="dcard hl" href="#curso"><span class="k">CURSO</span><h3>MEI do zero ao primeiro ano</h3><p>Dez módulos, apostila em PDF, turma ou individual.</p><span class="go">Conhecer o curso →</span></a>
+  </div>
+
+  <section id="trabalhos">
+    <div class="sh"><span class="eyebrow">Trabalhos</span><h2>Feitos recentemente</h2></div>
+    <div class="works">
+      <a class="work" href="https://www.instagram.com/geografia.analitica/" target="_blank" rel="noopener">
+        <span class="k">VÍDEO · DADOS ↗</span>
+        <h3>Zona Sul de Maceió: entre a laguna e o mar</h3>
+        <p>Sete bairros entre o oceano e a Laguna Mundaú, com a perda de população entre dois Censos e o patrimônio da região.</p>
+        <span class="src">IBGE · Censos 2010 e 2022 · imagem de satélite</span>
+      </a>
+      
+      <a class="work" href="https://www.instagram.com/geografia.analitica/" target="_blank" rel="noopener">
+        <span class="k">VÍDEO · RELEVO ↗</span>
+        <h3>Jacintinho: a cidade que subiu a ladeira</h3>
+        <p>Densidade, grotas e cultura popular num dos bairros mais habitados de Maceió, com modelo de elevação e perfil topográfico.</p>
+        <span class="src">IBGE · modelo de elevação · Prefeitura de Maceió</span>
+      </a>
+      
+      <a class="work" href="https://www.instagram.com/geografia.analitica/" target="_blank" rel="noopener">
+        <span class="k">VÍDEO · TERRITÓRIO ↗</span>
+        <h3>Cinco bairros e o que há embaixo deles</h3>
+        <p>O esvaziamento de Pinheiro, Mutange, Bebedouro, Bom Parto e Farol, com comparação de satélite entre 2018 e 2024.</p>
+        <span class="src">IBGE · Serviço Geológico do Brasil · MPF · ANM</span>
+      </a>
+      
+      <a class="work" href="#demo-oficina">
+        <span class="k">COMUNICAÇÃO · EVENTO →</span>
+        <h3>Materiais da oficina "Plantando saberes, colhendo possibilidades"</h3>
+        <p>Cards de divulgação, convites digitais personalizados, pôster, adesivos, lembrancinhas e a página de informações da oficina, realizada na Casa Verde, no Tabuleiro, em Maceió.</p>
+        <span class="src">identidade, peças digitais e impressas · página HTML</span>
+      </a>
+      
+      <a class="work" href="#demo-oficina">
+        <span class="k">OFICINA →</span>
+        <h3>Oficina de portfólio artístico</h3>
+        <p>Condução do módulo de produção de portfólio para artistas e produtores culturais, com vídeo explicativo e dois modelos editáveis para os participantes levarem.</p>
+        <span class="src">formação presencial · material de apoio próprio</span>
+      </a>
+      
+      <a class="work" href="#demo-painel">
+        <span class="k">PAINEL →</span>
+        <h3>Painéis interativos de dados</h3>
+        <p>Feito para um podcast, para organizar entrevistas e localizar pessoas antes da gravação. Clique para ver uma demonstração do formato, com dados públicos.</p>
+        <span class="src">painel HTML · ver demonstração</span>
+      </a>
+    </div>
+    <div class="cta" style="margin-top:22px"><a class="btn" href="https://www.instagram.com/geografia.analitica/" target="_blank" rel="noopener">Ver tudo no Instagram ↗</a></div>
+  </section>
+
+  <section id="sobre">
+    <div class="about">
+      <span class="eyebrow">Sobre</span>
+      <div>
+        <div class="text">
+          <h2 style="font-size:clamp(1.9rem,4.5vw,3rem);font-weight:800;letter-spacing:-.025em">Dados, tecnologia e território.</h2>
+          <p>Geografia Analítica trabalha com dados e tecnologia aplicados a problemas concretos: de análise de território e geomarketing a sites, automações e formação para quem está começando um negócio.</p>
+        </div>
+        <div class="principles">
+          <div><h3>Dado não é neutro</h3><p>Todo mapa depende de quem mede e do que fica de fora. As duas coisas são mostradas.</p></div>
+          <div><h3>Método à mostra</h3><p>Cada entrega explica como o resultado foi obtido: fontes, escolhas e limites.</p></div>
+          <div><h3>Feito para usar</h3><p>A entrega vem pronta para o dia a dia, com explicação de como mexer e continuar sozinho.</p></div>
+        </a>
+      
+      </div>
+    </div>
+  </section>
+
+  <section id="como">
+    <div class="sh"><span class="eyebrow">Como funciona</span><h2>Da pergunta ao mapa</h2></div>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><h3>Conversa</h3><p>A necessidade do projeto vira uma pergunta que os dados conseguem responder.</p></div>
+      <div class="step"><span class="n">2</span><h3>Proposta</h3><p>Escopo, fontes de dados, prazo e valor por escrito, antes de começar.</p></div>
+      <div class="step"><span class="n">3</span><h3>Análise</h3><p>Coleta, tratamento, análise espacial e uso de IA quando fizer sentido.</p></div>
+      <div class="step"><span class="n">4</span><h3>Entrega</h3><p>Mapas, painel ou relatório, com os arquivos e uma explicação do que os resultados mostram.</p></div>
+    </div>
+  </section>
+
+  </div>
+
+  <div class="view" id="demo-painel">
+  <section>
+    <div class="sh"><span class="eyebrow">Demonstração</span><h2>Painel: os cinco bairros do afundamento</h2></div>
+    <div class="demo">
+      <span class="badge">DEMONSTRAÇÃO · DADOS PÚBLICOS</span>
+      <p style="color:var(--muted);max-width:60ch">Exemplo do formato que entrego em painéis: dado bruto virando coisa que se lê de relance. Cada ponto é 100 moradores. Os pontos apagados saíram entre um Censo e outro. Clique num bairro para ver os números.</p>
+      <div class="demobar">
+        <button class="chip on" data-f="todos" type="button">Todos</button>
+        <button class="chip" data-f="queda" type="button">Perderam mais da metade</button>
+        <button class="chip" data-f="cresceu" type="button">Cresceram</button>
+      </div>
+      <div class="bgrid" id="bgrid"></div>
+      <p class="demonote">Fonte: IBGE, Censos de 2010 e 2022. O Censo conta moradores, não imóveis. Os cinco bairros estão no mapa de risco da Defesa Civil de Maceió — no Bom Parto e no Farol, só parte do território.</p>
+      <div class="cta" style="margin-top:18px"><a class="btn" href="#inicio">← Voltar aos trabalhos</a><a class="btn primary" href="#contato">Quero um painel assim</a></div>
+    </div>
+  </section>
+  </div>
+
+  <div class="view" id="demo-oficina">
+  <section>
+    <div class="sh"><span class="eyebrow">Demonstração</span><h2>Página de informações da oficina</h2></div>
+    <div class="demo">
+      <span class="badge">RECRIAÇÃO DA PEÇA</span>
+      <div class="ofc">
+        <div>
+          <h3 style="font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800;letter-spacing:-.02em;margin:0 0 10px">Plantando saberes,<br>colhendo possibilidades</h3>
+          <p style="color:var(--muted)">Oficina de escrita de projetos culturais e portfólio artístico, para artistas, produtores e coletivos que querem se inscrever em editais e organizar o próprio trabalho.</p>
+          <div class="mod"><h4>Escrita de projetos culturais</h4><p>Como ler um edital, montar a proposta e escrever o que a banca precisa encontrar.</p></div>
+          <div class="mod"><h4>Produção de portfólio artístico</h4><p>O que entra, como organizar e como apresentar. Os participantes levam vídeo explicativo e dois modelos editáveis.</p></div>
+          <p style="color:var(--muted);margin-top:18px">Vagas gratuitas. Leve material do seu trabalho — fotos, releases, registros — mesmo que esteja desorganizado: parte da oficina é justamente organizar.</p>
+        </div>
+        <div class="when">
+          <div><b>Quando</b>31 de outubro, sábado, às 9h</div>
+          <div><b>Onde</b>Casa Verde · Tabuleiro · Maceió, AL</div>
+          <div><b>Para quem</b>Artistas, produtores e coletivos culturais</div>
+          <div><b>Realização</b>Agentes Territoriais de Cultura · Comitê de Cultura</div>
+          <div><b>Peças produzidas</b>Cards de divulgação, convites digitais personalizados, pôster, adesivos, lembrancinhas e esta página</div>
+        </div>
+      </div>
+      <p class="demonote">Recriação da página de informações feita para a oficina, mostrada aqui como exemplo do tipo de peça que acompanha a comunicação de um evento.</p>
+      <div class="cta" style="margin-top:18px"><a class="btn" href="#inicio">← Voltar aos trabalhos</a><a class="btn primary" href="#contato">Quero isso no meu evento</a></div>
+    </div>
+  </section>
+  </div>
+
+  <div class="view" id="servicos">
+  <section>
+    <div class="sh"><span class="eyebrow">Serviços</span><h2>Serviços</h2></div>
+    <div class="svc">
+      <div class="row">
+        <span class="k">DADOS · IA</span>
+        <div><h3>Dados e inteligência artificial aplicados ao território</h3><p class="desc">Para quem tem dados (ou precisa deles) e quer entender o que acontece em cada lugar.</p></div>
+        <ul><li>Análise espacial: mapas de calor, pontos de concentração, padrões por bairro</li><li>Classificação de imagens de satélite com IA: vegetação, área construída, mudanças no tempo</li><li>Automação de mapas e relatórios</li><li>Organização e limpeza de bases de dados geográficos</li></ul><div class="deliver"><div><b>Você recebe</b><span>Mapas, camadas e arquivos em formato aberto, mais um relatório do método</span></div><div><b>Prazo típico</b><span>De uma a três semanas</span></div><div><b>Combinado antes</b><span>Escopo, fontes e valor fechados na proposta</span></div></div><div class="rowcta"><a href="https://wa.me/5582994281968?text=Ol%C3%A1%2C%20Lay%C3%AA!%20Vim%20pelo%20site%20e%20queria%20falar%20sobre%20um%20projeto." target="_blank" rel="noopener">Falar sobre isso</a></div>
+      </div>
+      <div class="row">
+        <span class="k">GEOMARKETING</span>
+        <div><h3>Onde abrir, quem atender, até onde entregar</h3><p class="desc">Para negócios que querem decidir a localização com dados, não com palpite.</p></div>
+        <ul><li>Estudo de localização para loja, clínica ou escritório</li><li>Perfil do público por bairro com dados do Censo do IBGE</li><li>Mapa de concorrência e de áreas de entrega</li><li>Leitura crítica do entorno: valorização, acesso e quem fica de fora</li></ul><div class="deliver"><div><b>Você recebe</b><span>Estudo com mapas, perfil do público e recomendação de localização</span></div><div><b>Prazo típico</b><span>De duas a quatro semanas</span></div><div><b>Combinado antes</b><span>Escopo, fontes e valor fechados na proposta</span></div></div><div class="rowcta"><a href="https://wa.me/5582994281968?text=Ol%C3%A1%2C%20Lay%C3%AA!%20Vim%20pelo%20site%20e%20queria%20falar%20sobre%20um%20projeto." target="_blank" rel="noopener">Falar sobre isso</a></div>
+      </div>
+      <div class="row">
+        <span class="k">MAPAS · PAINÉIS</span>
+        <div><h3>Mapas e painéis interativos</h3><p class="desc">Para pesquisas, projetos e organizações que precisam mostrar informação espacial com clareza.</p></div>
+        <ul><li>Mapas temáticos para relatórios, projetos e redes sociais</li><li>Painéis interativos com mapa e filtros, para acompanhar pesquisas de campo</li><li>Mapas de risco e de acesso a serviços</li></ul><div class="deliver"><div><b>Você recebe</b><span>Painel interativo ou mapas prontos para relatório e redes</span></div><div><b>Prazo típico</b><span>De uma a três semanas</span></div><div><b>Combinado antes</b><span>Escopo, fontes e valor fechados na proposta</span></div></div><div class="rowcta"><a href="https://wa.me/5582994281968?text=Ol%C3%A1%2C%20Lay%C3%AA!%20Vim%20pelo%20site%20e%20queria%20falar%20sobre%20um%20projeto." target="_blank" rel="noopener">Falar sobre isso</a></div>
+      </div>
+      <div class="row">
+        <span class="k">SITES · DIGITAL</span>
+        <div><h3>Criação de sites e presença digital</h3><p class="desc">Para quem precisa de um endereço próprio na internet, e não só de um perfil em rede social.</p></div>
+        <ul><li>Site institucional, página de serviços ou catálogo</li><li>Página única para campanha, evento ou portfólio</li><li>Botão de WhatsApp, formulário de contato e integração com o Instagram</li><li>Cadastro no Google Meu Negócio e ajustes básicos de busca</li></ul><div class="deliver"><div><b>Você recebe</b><span>Site no ar, com contato ligado ao WhatsApp e orientação para atualizar sozinho</span></div><div><b>Prazo típico</b><span>Conforme o número de páginas</span></div><div><b>Combinado antes</b><span>Escopo, fontes e valor fechados na proposta</span></div></div><div class="rowcta"><a href="https://wa.me/5582994281968?text=Ol%C3%A1%2C%20Lay%C3%AA!%20Vim%20pelo%20site%20e%20queria%20falar%20sobre%20um%20projeto." target="_blank" rel="noopener">Falar sobre isso</a></div>
+      </div>
+      <div class="row">
+        <span class="k">FORMAÇÃO · MEI</span>
+        <div><h3>Curso para MEI: abrir, manter em dia e organizar</h3><p class="desc">Para quem trabalha por conta própria e quer formalizar o negócio sem se perder na burocracia.</p></div>
+        <ul><li>O que é o MEI, quem pode ser e quanto custa por mês</li><li>Passo a passo da abertura e da emissão de nota fiscal</li><li>As obrigações do ano: DAS mensal e declaração anual</li><li>Organização das contas e primeiros passos de divulgação</li><li>Turmas ou atendimento individual, presencial em Maceió ou on-line</li></ul><div class="deliver"><div><b>Você recebe</b><span>Aulas, apostila em PDF e checklists para usar depois</span></div><div><b>Prazo típico</b><span>Combinado com a turma</span></div><div><b>Combinado antes</b><span>Escopo, fontes e valor fechados na proposta</span></div></div><div class="rowcta"><a href="https://wa.me/5582994281968?text=Ol%C3%A1%2C%20Lay%C3%AA!%20Vim%20pelo%20site%20e%20queria%20falar%20sobre%20um%20projeto." target="_blank" rel="noopener">Falar sobre isso</a></div>
+      </div>
+      <div class="row">
+        <span class="k">PESQUISA · CULTURA</span>
+        <div><h3>Pesquisa e portfólios</h3><p class="desc">Para produtoras, coletivos e artistas.</p></div>
+        <ul><li>Pré-pesquisa para podcasts, documentários e reportagens</li><li>Mapeamento de pessoas e lugares para entrevistas</li><li>Portfólios para editais culturais: organização, texto e design</li></ul><div class="deliver"><div><b>Você recebe</b><span>Dossiê, planilha de contatos ou portfólio pronto para inscrição</span></div><div><b>Prazo típico</b><span>De uma a três semanas</span></div><div><b>Combinado antes</b><span>Escopo, fontes e valor fechados na proposta</span></div></div><div class="rowcta"><a href="https://wa.me/5582994281968?text=Ol%C3%A1%2C%20Lay%C3%AA!%20Vim%20pelo%20site%20e%20queria%20falar%20sobre%20um%20projeto." target="_blank" rel="noopener">Falar sobre isso</a></div>
+      </div>
+    </div>
+    <div class="who" aria-label="Para quem"><span>Empresas</span><span>Pequenos negócios</span><span>MEI e autônomos</span><span>ONGs e movimentos</span><span>Pesquisadores</span><span>Produtoras e podcasts</span><span>Artistas e coletivos</span></div>
+  </section>
+
+  </div>
+
+  <div class="view" id="curso">
+  <section>
+    <div class="sh"><span class="eyebrow">Curso</span><h2>MEI do zero ao primeiro ano</h2></div>
+    <div class="curso">
+      <div>
+        <p style="color:var(--muted);max-width:46ch">Para quem trabalha por conta própria e quer formalizar o negócio sem depender de alguém a cada passo. São dez módulos com passo a passo, exercícios, checklists e o calendário do ano.</p>
+        <ol class="prog">
+          <li>O que é o MEI e quem pode ser</li>
+          <li>Antes de abrir: a conta que decide</li>
+          <li>Abertura passo a passo</li>
+          <li>O DAS: quanto é, quando vence, o que fazer se atrasar</li>
+          <li>Nota fiscal: quando é obrigatória</li>
+          <li>A declaração anual (DASN-SIMEI)</li>
+          <li>Controlar o faturamento e não estourar o teto</li>
+          <li>Direitos, INSS e contratar empregado</li>
+          <li>O que muda em 2027 e 2028</li>
+          <li>Calendário, checklists e planilha de controle</li>
+        </ol>
+      </div>
+      <div>
+        <div class="facts">
+          <div><b>Formato</b><span>Turma ou atendimento individual, presencial em Maceió ou on-line.</span></div>
+          <div><b>Material</b><span>Apostila em PDF, 15 páginas, para acompanhar e consultar depois.</span></div>
+          <div><b>Atualizado</b><span>Outubro de 2026, já com os novos tetos de 2027 e 2028 e o prazo do perdão de dívidas.</span></div>
+          <div><b>Fontes</b><span>Receita Federal, Portal do Empreendedor e a legislação citada no material.</span></div>
+        </div>
+        <div class="cta" style="margin-top:24px">
+          <button class="btn primary" type="button" id="dl-curso">Baixar a apostila (PDF)</button>
+          <a class="btn" href="https://wa.me/5582994281968?text=Ol%C3%A1%2C%20Lay%C3%AA!%20Quero%20saber%20sobre%20o%20curso%20de%20MEI." target="_blank" rel="noopener">Falar sobre a próxima turma</a>
+        </div>
+        <p class="hint" style="margin-top:14px" id="dl-hint">A apostila é gratuita, em PDF. Material educativo: não substitui orientação contábil individual.</p>
+      </div>
+    </div>
+  </section>
+
+  </div>
+
+  <div class="view" id="ajuda">
+  <!-- DEPOIMENTOS: seção pronta, aguardando falas reais de clientes ou alunos.
+       Para ativar, troque o conteúdo abaixo pelos depoimentos e remova style="display:none".
+  <section id="depoimentos">
+    <div class="sh"><span class="eyebrow">Depoimentos</span><h2>O que dizem quem já contratou</h2></div>
+    <div class="deps">
+      <figure><blockquote>...</blockquote><figcaption>Nome · onde</figcaption></figure>
+    </div>
+  </section>
+  -->
+
+  <section>
+    <div class="sh"><span class="eyebrow">Ajuda</span><h2>Perguntas frequentes</h2></div>
+    <div class="faq">
+      <details open>
+        <summary>Como começo um trabalho?</summary>
+        <div class="a"><p>Mande uma mensagem pelo WhatsApp ou pelo e-mail descrevendo o que precisa, o prazo e o lugar. O primeiro retorno é uma conversa curta para entender o problema; depois vai uma proposta por escrito, com escopo, fontes de dados, prazo e valor. Nada começa antes de você aprovar.</p></div>
+      </details>
+      <details>
+        <summary>Quanto custa?</summary>
+        <div class="a"><p>O valor depende do tamanho do recorte, da quantidade de dados e do formato da entrega. Um mapa temático é bem diferente de um painel interativo ou de um site. Por isso o orçamento é sempre feito caso a caso, e vai fechado na proposta — sem cobrança por hora surpresa no meio do caminho.</p></div>
+      </details>
+      <details>
+        <summary>Preciso ter os dados prontos?</summary>
+        <div class="a"><p>Não. Boa parte dos projetos usa bases públicas — IBGE, dados abertos de prefeituras e do governo federal, imagens de satélite. Se você já tem uma planilha, ela entra no trabalho mesmo bagunçada: a organização faz parte do serviço.</p></div>
+      </details>
+      <details>
+        <summary>Atende fora de Maceió?</summary>
+        <div class="a"><p>Sim. Análise de dados, mapas, painéis e sites são feitos a distância, para qualquer lugar do país. Trabalho de campo e atendimento presencial ficam restritos a Maceió e região metropolitana, ou mediante combinação de deslocamento.</p></div>
+      </details>
+      <details>
+        <summary>Em quanto tempo fica pronto?</summary>
+        <div class="a"><p>Depende do serviço, e o prazo exato vai na proposta. Como referência: um mapa ou análise pontual costuma levar alguns dias; um estudo de localização ou um painel, algumas semanas; um site, de acordo com o número de páginas e com a rapidez do envio dos textos e imagens.</p></div>
+      </details>
+      <details>
+        <summary>O que recebo no fim?</summary>
+        <div class="a"><p>Os arquivos da entrega e uma explicação do que os resultados mostram — com as fontes usadas, as escolhas feitas e os limites do que o dado consegue dizer. No caso de sites e painéis, vai junto uma orientação de como mexer e atualizar sozinho.</p></div>
+      </details>
+      <details>
+        <summary>Como funciona o curso para MEI?</summary>
+        <div class="a"><p>Em turma ou em atendimento individual, presencial em Maceió ou on-line. O curso cobre o que é o MEI e quem pode ser, a abertura, a emissão de nota fiscal, as obrigações do ano e a organização das contas.</p><p>Datas, formato e valor da próxima turma são combinados pelo WhatsApp.</p></div>
+      </details>
+      <details>
+        <summary>Como funciona o pagamento?</summary>
+        <div class="a"><p>As condições vão na proposta, antes de qualquer trabalho começar: valor fechado, forma de pagamento e prazos. Nada é cobrado antes de você aprovar, e não há cobrança por hora aparecendo no meio do caminho.</p></div>
+      </details>
+      <details>
+        <summary>Quantas revisões estão incluídas?</summary>
+        <div class="a"><p>Toda entrega passa por uma rodada de ajustes depois que você vê o resultado — é parte do trabalho, não um extra. Mudanças que alterem o escopo combinado, como trocar o recorte da análise ou acrescentar páginas a um site, viram um complemento de proposta, conversado antes.</p></div>
+      </details>
+      <details>
+        <summary>Como eu envio os meus arquivos?</summary>
+        <div class="a"><p>Do jeito que for mais fácil para você: WhatsApp, e-mail ou um link de pasta compartilhada. Planilha, PDF, foto de caderno — pode mandar como está, a organização faz parte do serviço.</p></div>
+      </details>
+      <details>
+        <summary>Dá para acompanhar o andamento?</summary>
+        <div class="a"><p>Sim. Em trabalhos de mais de uma semana, você recebe um retorno no meio do caminho, com o que já está pronto, para corrigir o rumo cedo em vez de descobrir no fim que não era aquilo.</p></div>
+      </details>
+      <details>
+        <summary>E os meus dados?</summary>
+        <div class="a"><p>Material e informações enviados são usados apenas no projeto contratado. Bases com dados pessoais são tratadas com cuidado e anonimizadas sempre que o resultado não depender da identificação.</p></div>
+      </details>
+    </div>
+  </section>
+
+  </div>
+
+  <div class="view" id="contato">
+  <section>
+    <div class="contact">
+      <div>
+        <span class="eyebrow">Contato</span>
+        <h2 style="margin-top:10px">Vamos mapear o seu projeto?</h2>
+        <p style="color:var(--muted);margin-top:14px;max-width:40ch">Descreva em poucas linhas a necessidade, o prazo e o lugar. O retorno vem com as próximas etapas.</p>
+        <p class="mail"><span style="color:var(--lagoa)">geografia.analitica@gmail.com</span><button class="copy" type="button" id="copy-mail">Copiar</button></p>
+        <p class="mail" style="margin-top:8px"><a href="https://wa.me/5582994281968" target="_blank" rel="noopener">(82) 99428-1968</a><button class="copy" type="button" id="copy-fone">Copiar</button></p><p class="mail" style="margin-top:8px"><a href="https://www.instagram.com/geografia.analitica/" target="_blank" rel="noopener">@geografia.analitica</a></p><div class="cta" style="margin-top:18px"><a class="btn primary" href="https://wa.me/5582994281968?text=Ol%C3%A1%2C%20Lay%C3%AA!%20Vim%20pelo%20site%20e%20queria%20falar%20sobre%20um%20projeto." target="_blank" rel="noopener">Falar no WhatsApp</a></div>
+      </div>
+      <form id="brief" aria-label="Montar e-mail de orçamento">
+        <label for="f-nome">Seu nome<input id="f-nome" autocomplete="name" placeholder="Ex.: Ana Souza"></label>
+        <label for="f-serv">Serviço
+          <select id="f-serv">
+            <option>Dados e IA aplicados ao território</option>
+            <option>Geomarketing</option>
+            <option>Mapas e painéis interativos</option>
+            <option>Criação de site</option>
+            <option>Curso para MEI</option>
+            <option>Pesquisa e portfólios</option>
+            <option>Ainda não sei</option>
+          </select>
+        </label>
+        <label for="f-local">Lugar (cidade ou bairro)<input id="f-local" placeholder="Ex.: Jatiúca, Maceió"></label>
+        <label for="f-msg">O que você precisa<textarea id="f-msg" placeholder="Ex.: quero saber qual bairro tem mais potencial para abrir uma cafeteria."></textarea></label>
+        <button class="btn primary" type="submit">Montar mensagem</button>
+        <div id="out" hidden style="display:grid;gap:10px">
+          <label for="f-pronta">Mensagem pronta<textarea id="f-pronta" readonly style="min-height:170px"></textarea></label>
+          <div class="cta" style="margin-top:0">
+            <button class="btn primary" type="button" id="copy-msg">Copiar mensagem</button>
+            <a class="btn" id="gmail" target="_blank" rel="noopener" href="#">Abrir no Gmail</a>
+          </div>
+          <p class="hint">Copie e envie para geografia.analitica@gmail.com pelo seu e-mail, ou use o botão do Gmail, que abre em outra aba.</p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  </div>
+  </main>
+
+  <footer>
+    <span class="brand">geografia analítica<span class="cur">_</span></span>
+    <span class="mono">Layê · profissional de geografia e dados · Maceió, AL<br><a href="mailto:geografia.analitica@gmail.com">geografia.analitica@gmail.com</a> · <a href="https://wa.me/5582994281968" target="_blank" rel="noopener">(82) 99428-1968</a> · <a href="https://www.instagram.com/geografia.analitica/" target="_blank" rel="noopener">@geografia.analitica</a></span>
+  </footer>
+</div>
+
+<script>
+// Campo de curvas de nível gerado (marching squares sobre um relevo suave)
+(function(){
+  const cv=document.getElementById('field'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W,H,dpr,t=0,raf;
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  function size(){dpr=Math.min(devicePixelRatio||1,2);const r=cv.getBoundingClientRect();W=r.width;H=r.height;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+  const blobs=[[.78,.28,.22,1],[.62,.7,.18,.8],[.92,.78,.16,.7],[.35,.9,.2,-.5],[.15,.15,.14,-.4]];
+  function h(x,y,tt){let v=0;for(const [bx,by,r,a] of blobs){const cx=bx+.02*Math.sin(tt+bx*9),cy=by+.02*Math.cos(tt*.8+by*7);const d=((x-cx)**2+((y-cy)*H/W)**2)/(r*r);v+=a*Math.exp(-d)}return v}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const step=W<500?14:12,cols=Math.ceil(W/step)+1,rows=Math.ceil(H/step)+1;
+    const g=new Float32Array(cols*rows);
+    for(let j=0;j<rows;j++)for(let i=0;i<cols;i++)g[j*cols+i]=h(i*step/W,j*step/H,t);
+    const levels=[-.35,-.2,-.08,.08,.2,.35,.5,.65,.8];
+    levels.forEach((L,li)=>{
+      ctx.beginPath();
+      for(let j=0;j<rows-1;j++)for(let i=0;i<cols-1;i++){
+        const a=g[j*cols+i],b=g[j*cols+i+1],c=g[(j+1)*cols+i+1],d=g[(j+1)*cols+i];
+        const idx=(a>L)|((b>L)<<1)|((c>L)<<2)|((d>L)<<3);if(idx===0||idx===15)continue;
+        const x=i*step,y=j*step,lerp=(p,q)=>(L-p)/(q-p);
+        const T=[x+step*lerp(a,b),y],R=[x+step,y+step*lerp(b,c)],B=[x+step*lerp(d,c),y+step],Lf=[x,y+step*lerp(a,d)];
+        const segs={1:[Lf,T],2:[T,R],3:[Lf,R],4:[R,B],5:[Lf,T,R,B],6:[T,B],7:[Lf,B],8:[B,Lf],9:[B,T],10:[T,R,B,Lf],11:[B,R],12:[R,Lf],13:[R,T],14:[T,Lf]}[idx];
+        for(let k=0;k<segs.length;k+=2){ctx.moveTo(segs[k][0],segs[k][1]);ctx.lineTo(segs[k+1][0],segs[k+1][1])}
+      }
+      const hi=li===levels.length-3;
+      ctx.strokeStyle=hi?css('--contour-hi'):css('--contour');ctx.lineWidth=hi?1.4:1;ctx.stroke();
+    });
+    const z=document.querySelector('#ro-z b');if(z)z.textContent=levels.length+' níveis';
+  }
+  function loop(){t+=.004;draw();raf=requestAnimationFrame(loop)}
+  size();draw();
+  if(!reduce)loop();
+  addEventListener('resize',()=>{size();draw()});
+  })();
+
+(async()=>{
+  const btn=document.getElementById('dl-curso'), hint=document.getElementById('dl-hint');
+  if(!btn) return;
+  let dl=null;
+  try{ dl = window.claude && claude.use ? await claude.use('downloads') : null; }catch(_){ dl=null; }
+  if(!dl){
+    btn.textContent='Pedir a apostila pelo WhatsApp';
+    btn.onclick=()=>window.open('https://wa.me/5582994281968?text=Ol%C3%A1%2C%20Lay%C3%AA!%20Quero%20a%20apostila%20do%20curso%20de%20MEI.','_blank','noopener');
+    if(hint) hint.textContent='Neste navegador o download direto não está disponível: peça a apostila que eu envio o arquivo.';
+    return;
+  }
+  btn.onclick=async()=>{
+    const txt=btn.textContent; btn.disabled=true; btn.textContent='Preparando...';
+    try{
+      const r=await fetch('curso-mei.pdf');
+      if(!r.ok) throw new Error('fetch');
+      const blob=await r.blob();
+      await dl.save({filename:'Curso MEI - do zero ao primeiro ano.pdf', data:blob});
+      btn.textContent='Baixado'; setTimeout(()=>{btn.textContent=txt;btn.disabled=false},2200);
+    }catch(err){
+      const code=err&&err.code;
+      if(code==='declined'){ btn.textContent=txt; btn.disabled=false; return; }
+      btn.textContent=txt; btn.disabled=false;
+      if(hint) hint.textContent='Não consegui entregar o arquivo agora. Peça pelo WhatsApp que eu envio.';
+    }
+  };
+})();
+document.getElementById('copy-fone').onclick=e=>{
+  const b=e.currentTarget,done=()=>{b.textContent='Copiado';setTimeout(()=>b.textContent='Copiar',1600)};
+  const txt='82994281968';
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done).catch(()=>{});else done();
+};
+document.getElementById('copy-mail').onclick=e=>{
+  const b=e.currentTarget,done=()=>{b.textContent='Copiado';setTimeout(()=>b.textContent='Copiar',1600)};
+  const txt='geografia.analitica@gmail.com';
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done).catch(()=>{});else done();
+};
+// troca de tela: cada item do menu abre uma view
+(function(){
+  const VIEWS=['inicio','servicos','curso','ajuda','contato','demo-painel','demo-oficina'];
+  const navs=[...document.querySelectorAll('.top nav a[href^="#"]')];
+  function show(id,push){
+    if(!VIEWS.includes(id)) id='inicio';
+    VIEWS.forEach(v=>{const el=document.getElementById(v);if(el)el.classList.toggle('on',v===id)});
+    navs.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id));
+    if(push && location.hash!=='#'+id) history.pushState({v:id},'','#'+id);
+    window.scrollTo({top:0,behavior:'auto'});
+    document.title = id==='inicio' ? 'Geografia Analítica' : 'Geografia Analítica · '+({servicos:'Serviços',curso:'Curso MEI',ajuda:'Ajuda',contato:'Contato','demo-painel':'Painel (demonstração)','demo-oficina':'Oficina (demonstração)'}[id]||'');
+  }
+  document.addEventListener('click',e=>{
+    const a=e.target.closest('a[href^="#"]');if(!a)return;
+    const id=a.getAttribute('href').slice(1);if(!id)return;
+    if(!VIEWS.includes(id))return;
+    e.preventDefault(); show(id,true);
+  });
+  addEventListener('popstate',()=>show(location.hash.slice(1),false));
+  show(location.hash.slice(1)||'inicio',false);
+})();
+function copyText(txt,btn,label){
+  const done=()=>{btn.textContent='Copiado';setTimeout(()=>btn.textContent=label,1600)};
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done).catch(fb);else fb();
+  function fb(){const ta=document.getElementById('f-pronta');ta.hidden=false;ta.select();try{document.execCommand('copy');done()}catch(_){}}
+}
+document.getElementById('brief').addEventListener('submit',e=>{
+  e.preventDefault();
+  const v=id=>document.getElementById(id).value.trim();
+  const serv=v('f-serv');
+  const subject=`Orçamento: ${serv}`;
+  const body=`Olá, Layê!\n\nMeu nome é ${v('f-nome')||'(seu nome)'}.\nServiço: ${serv}\nLugar: ${v('f-local')||'(cidade ou bairro)'}\n\n${v('f-msg')||'(descreva o que você precisa)'}\n`;
+  document.getElementById('f-pronta').value=`Assunto: ${subject}\n\n${body}`;
+  document.getElementById('gmail').href=`https://mail.google.com/mail/?view=cm&fs=1&to=geografia.analitica@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const out=document.getElementById('out');out.hidden=false;out.scrollIntoView({block:'nearest'});
+});
+document.getElementById('copy-msg').onclick=e=>copyText(document.getElementById('f-pronta').value,e.currentTarget,'Copiar mensagem');
+
+// demonstração: painel dos cinco bairros (IBGE, Censos 2010 e 2022)
+(function(){
+  const B=[
+    {n:'Pinheiro',  a:19062, b:5369},
+    {n:'Mutange',   a:2632,  b:0},
+    {n:'Bebedouro', a:10103, b:1128},
+    {n:'Bom Parto', a:12841, b:8010},
+    {n:'Farol',     a:16859, b:17789}
+  ];
+  const el=document.getElementById('bgrid'); if(!el) return;
+  const fmt=n=>n.toLocaleString('pt-BR');
+  let filtro='todos', sel=null;
+  function pass(x){
+    const v=(x.b/x.a-1)*100;
+    if(filtro==='queda') return v<=-50;
+    if(filtro==='cresceu') return v>0;
+    return true;
+  }
+  function render(){
+    el.innerHTML='';
+    B.filter(pass).forEach(x=>{
+      const v=(x.b/x.a-1)*100, dn=v<0;
+      const tot=Math.max(1,Math.round(x.a/100)), fica=Math.round(x.b/100);
+      const card=document.createElement('div');
+      card.className='bitem'+(sel===x.n?' sel':'');
+      let dots='';
+      for(let i=0;i<Math.max(tot,fica);i++) dots+='<span class="dot'+(i<fica?'':' go')+'"></span>';
+      card.innerHTML='<div class="top2"><h4>'+x.n+'</h4><span class="pct '+(dn?'dn':'up')+'">'+
+        (dn?'\u2212':'+')+Math.abs(v).toFixed(1).replace('.',',')+'%</span></div>'+
+        '<div class="dots">'+dots+'</div>'+
+        '<div class="nums">2010 \u00b7 '+fmt(x.a)+' moradores &nbsp;\u2192&nbsp; 2022 \u00b7 '+fmt(x.b)+'</div>'+
+        (sel===x.n?'<div class="nums" style="color:var(--ink)">Diferen\u00e7a: '+fmt(x.b-x.a)+' pessoas. Cada ponto representa 100 moradores; os apagados sa\u00edram no per\u00edodo.</div>':'');
+      card.onclick=()=>{sel=(sel===x.n?null:x.n);render()};
+      el.appendChild(card);
+    });
+    if(!el.children.length) el.innerHTML='<p style="color:var(--muted)">Nenhum bairro neste filtro.</p>';
+  }
+  document.querySelectorAll('.demobar .chip').forEach(c=>{
+    c.onclick=()=>{filtro=c.dataset.f;
+      document.querySelectorAll('.demobar .chip').forEach(o=>o.classList.toggle('on',o===c));
+      sel=null; render();};
+  });
+  render();
+})();
+</script>
+</html>
+
+</body></html>
